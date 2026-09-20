@@ -6,16 +6,15 @@ import jwt from "jsonwebtoken";
 import db from "./database.js";
 
 const router = Router();
+const JWT_SECRET = process.env.JWT_SECRET || "mehr-local-dev-secret";
 
 function normalizePhone(value) {
   return value
     .trim()
-    .replace(/[۰-۹]/g, (digit) =>
-      String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit))
-    )
-    .replace(/[٠-٩]/g, (digit) =>
-      String("٠١٢٣٤٥٦٧٨٩".indexOf(digit))
-    );
+    .replace(/[۰-۹]/g, (digit) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
+    .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)))
+    .replace(/\s+/g, "")
+    .replace(/^\+98/, "0");
 }
 
 function publicUser(user) {
@@ -27,15 +26,9 @@ function publicUser(user) {
 }
 
 function issueAccessToken(user) {
-  const signingKey = process.env.JWT_SECRET;
-
-  if (!signingKey) {
-    throw new Error("Missing JWT signing key");
-  }
-
   return jwt.sign(
-    {},
-    signingKey,
+    { type: "access" },
+    JWT_SECRET,
     {
       subject: String(user.id),
       algorithm: "HS256",
@@ -44,7 +37,48 @@ function issueAccessToken(user) {
   );
 }
 
-// ثبت‌نام
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({
+      success: false,
+      message: "نشست نامعتبر است. لطفاً دوباره وارد شوید.",
+    });
+  }
+
+  const token = authHeader.replace("Bearer ", "").trim();
+
+  try {
+    const payload = jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] });
+    const user = db
+      .prepare("SELECT id, full_name, phone FROM users WHERE id = ?")
+      .get(Number(payload.sub));
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "کاربر پیدا نشد.",
+      });
+    }
+
+    req.user = user;
+    return next();
+  } catch {
+    return res.status(401).json({
+      success: false,
+      message: "توکن شما نامعتبر است یا منقضی شده است.",
+    });
+  }
+}
+
+router.get("/me", authenticateToken, (req, res) => {
+  return res.json({
+    success: true,
+    user: publicUser(req.user),
+  });
+});
+
 router.post("/register", async (req, res) => {
   try {
     const { fullName, phone, password } = req.body ?? {};
@@ -77,20 +111,12 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    if (password.length < 8) {
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,72}$/.test(password)) {
       return res.status(400).json({
         success: false,
-        message: "رمز عبور باید حداقل ۸ کاراکتر باشد.",
+        message: "رمز عبور باید حداقل ۸ کاراکتر، شامل حرف بزرگ، کوچک و عدد باشد.",
       });
     }
-
-   if (Buffer.byteLength(password, "utf8") > 72) {
-  return res.status(400).json({
-    success: false,
-    message: "رمز عبور بیش از حد طولانی است؛ حداکثر ۷۲ بایت.",
-  });
-}
-
 
     const existingUser = db
       .prepare("SELECT id FROM users WHERE phone = ?")
@@ -142,15 +168,11 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// ورود
 router.post("/login", async (req, res) => {
   try {
     const { phone, password } = req.body ?? {};
 
-    if (
-      typeof phone !== "string" ||
-      typeof password !== "string"
-    ) {
+    if (typeof phone !== "string" || typeof password !== "string") {
       return res.status(400).json({
         success: false,
         message: "شماره موبایل و رمز عبور را وارد کنید.",
@@ -166,10 +188,7 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    if (
-      password.length < 8 ||
-      Buffer.byteLength(password, "utf8") > 72
-    ) {
+    if (password.length < 8 || Buffer.byteLength(password, "utf8") > 72) {
       return res.status(401).json({
         success: false,
         message: "شماره موبایل یا رمز عبور اشتباه است.",
@@ -191,10 +210,7 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const passwordMatches = await bcrypt.compare(
-      password,
-      user.password_hash
-    );
+    const passwordMatches = await bcrypt.compare(password, user.password_hash);
 
     if (!passwordMatches) {
       return res.status(401).json({
@@ -217,6 +233,51 @@ router.post("/login", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "ورود انجام نشد. دوباره تلاش کنید.",
+    });
+  }
+});
+
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { phone } = req.body ?? {};
+
+    if (typeof phone !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "شماره موبایل را وارد کنید.",
+      });
+    }
+
+    const cleanPhone = normalizePhone(phone);
+
+    if (!/^09\d{9}$/.test(cleanPhone)) {
+      return res.status(400).json({
+        success: false,
+        message: "شماره موبایل معتبر نیست.",
+      });
+    }
+
+    const existingUser = db
+      .prepare("SELECT id FROM users WHERE phone = ?")
+      .get(cleanPhone);
+
+    if (!existingUser) {
+      return res.json({
+        success: true,
+        message: "اگر این شماره ثبت شده باشد، لینک بازیابی برای آن ارسال می‌شود.",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "درخواست بازیابی برای شماره شما ثبت شد. در نسخه آزمایشی، پیامک/ایمیل واقعی ارسال نمی‌شود.",
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "درخواست بازیابی انجام نشد. دوباره تلاش کنید.",
     });
   }
 });

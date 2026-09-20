@@ -1,13 +1,19 @@
-import { checkServer } from "./services/api";
+import { useEffect, useMemo, useState } from "react";
+import {
+  checkServer,
+  clearAuthSession,
+  getCurrentUser,
+  getStoredAuth,
+  loginUser,
+  registerUser,
+  requestPasswordReset,
+  submitCartOrder,
+} from "./services/api";
 
-import { useState } from "react";
-
-
-
-const normalizeDigits = (value) =>
+const normalizeDigits = (value = "") =>
   value
-    .replace(/[۰-۹]/g, (digit) => "۰۱۲۳۴۵۶۷۸۹".indexOf(digit))
-    .replace(/[٠-٩]/g, (digit) => "٠١٢٣٤٥٦٧٨٩".indexOf(digit));
+    .replace(/[۰-۹]/g, (digit) => "۰۱۲۳۴۵۶۷۸۹".indexOf(digit).toString())
+    .replace(/[٠-٩]/g, (digit) => "٠١٢٣٤٥٦٧٨٩".indexOf(digit).toString());
 
 function SunMark({ className = "" }) {
   return (
@@ -46,6 +52,61 @@ function EyeIcon({ open }) {
   );
 }
 
+function SidebarIcon({ name }) {
+  const commonProps = {
+    width: 16,
+    height: 16,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": "true",
+  };
+
+  const icons = {
+    dashboard: (
+      <svg {...commonProps}>
+        <path d="M3 10.5 12 3l9 7.5" />
+        <path d="M5 9.5V20h14V9.5" />
+        <path d="M9 20v-6h6v6" />
+      </svg>
+    ),
+    books: (
+      <svg {...commonProps}>
+        <path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15.5H7.5A2.5 2.5 0 0 0 5 21V5.5Z" />
+        <path d="M5 5.5V20" />
+        <path d="M9 7h6M9 11h6" />
+      </svg>
+    ),
+    cart: (
+      <svg {...commonProps}>
+        <circle cx="9" cy="18" r="1.5" />
+        <circle cx="17" cy="18" r="1.5" />
+        <path d="M3 4h2l2.4 9.2a1 1 0 0 0 1 .8H17a1 1 0 0 0 1-.8L20 7H7" />
+      </svg>
+    ),
+    orders: (
+      <svg {...commonProps}>
+        <path d="M7 4.5h10a2 2 0 0 1 2 2V19a1 1 0 0 1-1.5.9L12 17.5l-5.5 2.4A1 1 0 0 1 5 19V6.5a2 2 0 0 1 2-2Z" />
+        <path d="M9 8.5h6M9 12h6" />
+      </svg>
+    ),
+    profile: (
+      <svg {...commonProps}>
+        <circle cx="12" cy="8" r="3.2" />
+        <path d="M5 19c1.2-2.8 4-4.2 7-4.2s5.8 1.4 7 4.2" />
+      </svg>
+    ),
+  };
+
+  return <span className="nav-icon">{icons[name] || icons.dashboard}</span>;
+}
+
+const formatPrice = (value) =>
+  `${new Intl.NumberFormat("fa-IR").format(value)} تومان`;
+
 const initialValues = {
   name: "",
   phone: "",
@@ -53,29 +114,192 @@ const initialValues = {
   acceptTerms: false,
 };
 
+const dashboardProducts = [
+  {
+    id: 1,
+    title: "کتاب رشد فردی",
+    category: "آموزشی",
+    price: 269000,
+    image: "/products/book-growth.svg",
+    description: "راهنمای تمرین‌های روزانه برای ساختن عادت‌های پایدار.",
+    badge: "پرفروش",
+    rating: 4.9,
+  },
+  {
+    id: 2,
+    title: "دفتر برنامه‌ریزی",
+    category: "ابزار",
+    price: 149000,
+    image: "/products/book-planner.svg",
+    description: "برای نظم، اهداف و پیگیری روزانه با طراحی ساده و کاربردی.",
+    badge: "جدید",
+    rating: 4.8,
+  },
+  {
+    id: 3,
+    title: "کتاب داستان‌های الهام‌بخش",
+    category: "ادبی",
+    price: 199000,
+    image: "/products/book-story.svg",
+    description: "داستان‌های کوتاه با پیام‌های مثبت و انگیزشی برای آرامش ذهن.",
+    badge: "ویژه",
+    rating: 4.7,
+  },
+  {
+    id: 4,
+    title: "جعبه ابزار ذهنی",
+    category: "همراهی",
+    price: 349000,
+    image: "/products/book-tools.svg",
+    description: "مجموعه‌ای از تمرین‌ها و تکنیک‌ها برای بهبود تمرکز و آرامش.",
+    badge: "مخصوص",
+    rating: 5,
+  },
+];
+
+const productCategories = ["همه", ...new Set(dashboardProducts.map((product) => product.category))];
+
+const sidebarNav = [
+  { id: "dashboard", label: "داشبورد", icon: "dashboard" },
+  { id: "books", label: "کتاب‌ها", icon: "books" },
+  { id: "cart", label: "سبد خرید", icon: "cart" },
+  { id: "orders", label: "سفارش‌ها", icon: "orders" },
+  { id: "profile", label: "پروفایل", icon: "profile" },
+];
+
+const quickStats = [
+  { label: "دستگاه‌ها", value: "۱۲", trend: "+۸%" },
+  { label: "سفارش‌ها", value: "۵۴", trend: "+۱۲%" },
+  { label: "امتیاز", value: "۴.۹", trend: "+۰.۲" },
+];
+
+const featuredOffers = [
+  { title: "پیشنهاد ویژه", text: "تخفیف ۲۰٪ روی کتاب‌های رشد فردی", accent: "gold" },
+  { title: "بسته‌ی هدیه", text: "دو کتاب انتخابی با ارسال رایگان", accent: "teal" },
+];
+
+const recentOrders = [
+  { name: "کتاب رشد فردی", status: "تحویل داده شد" },
+  { name: "دفتر برنامه‌ریزی", status: "در حال ارسال" },
+  { name: "کتاب داستان", status: "در انتظار پرداخت" },
+];
+
 export default function App() {
   const [mode, setMode] = useState("login");
   const [values, setValues] = useState(initialValues);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [notice, setNotice] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [activeUser, setActiveUser] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("همه");
+  const [activeNav, setActiveNav] = useState("dashboard");
+  const [selectedProduct, setSelectedProduct] = useState(dashboardProducts[0]);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") {
+      return "light";
+    }
 
-    const isSignup = mode === "signup";
+    try {
+      const savedTheme = window.localStorage.getItem("mehr-theme");
+      return savedTheme === "dark" ? "dark" : "light";
+    } catch {
+      return "light";
+    }
+  });
+
+  const isSignup = mode === "signup";
   const isForgot = mode === "forgot";
 
- async function handleCheckServer() {
-  try {
-    const data = await checkServer();
-    window.alert(data.message || "اتصال به سرور برقرار است.");
-  } catch (error) {
-    console.error("API connection failed:", error);
-    window.alert("اتصال به سرور برقرار نشد.");
-  }
-}
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
 
+    document.documentElement.setAttribute("data-theme", theme);
+
+    try {
+      window.localStorage.setItem("mehr-theme", theme);
+    } catch {
+      // ignore storage errors in restricted browser contexts
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    try {
+      const savedCart = JSON.parse(window.localStorage.getItem("mehr-cart") || "[]");
+      if (Array.isArray(savedCart)) {
+        setCart(savedCart);
+      }
+    } catch {
+      setCart([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("mehr-cart", JSON.stringify(cart));
+    } catch {
+      // ignore storage errors in restricted browser contexts
+    }
+  }, [cart]);
+
+  useEffect(() => {
+    const session = getStoredAuth();
+
+    if (session.token) {
+      getCurrentUser()
+        .then((user) => {
+          if (user) {
+            setActiveUser(user);
+            setNotice(`خوش‌آمدگویی، ${user.fullName || "کاربر"}.`);
+          } else {
+            clearAuthSession();
+          }
+        })
+        .catch(() => {
+          clearAuthSession();
+        });
+    }
+  }, []);
+
+  const cartTotal = useMemo(
+    () => cart.reduce((total, item) => total + item.quantity * item.price, 0),
+    [cart]
+  );
+
+  const cartCount = useMemo(
+    () => cart.reduce((sum, item) => sum + item.quantity, 0),
+    [cart]
+  );
+
+  const filteredProducts = useMemo(() => {
+    const query = searchTerm.trim();
+
+    return dashboardProducts.filter((product) => {
+      const matchesCategory =
+        selectedCategory === "همه" || product.category === selectedCategory;
+      const haystack = `${product.title} ${product.description} ${product.category}`.toLowerCase();
+      const matchesQuery = !query || haystack.includes(query.toLowerCase());
+
+      return matchesCategory && matchesQuery;
+    });
+  }, [searchTerm, selectedCategory]);
+
+  async function handleCheckServer() {
+    try {
+      const data = await checkServer();
+      window.alert(data.message || "اتصال به سرور برقرار است.");
+    } catch (error) {
+      console.error("API connection failed:", error);
+      window.alert("اتصال به سرور برقرار نشد.");
+    }
+  }
 
   function changeMode(nextMode) {
-
     setMode(nextMode);
     setErrors({});
     setNotice("");
@@ -102,23 +326,93 @@ export default function App() {
     setNotice("");
   }
 
-  function handleSubmit(event) {
+  function addToCart(product) {
+    setCart((previous) => {
+      const existing = previous.find((item) => item.id === product.id);
+
+      if (existing) {
+        return previous.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+
+      return [...previous, { ...product, quantity: 1 }];
+    });
+
+    setNotice(`${product.title} به سبد خرید اضافه شد.`);
+  }
+
+  function updateCartQuantity(productId, delta) {
+    setCart((previous) =>
+      previous
+        .map((item) =>
+          item.id === productId
+            ? { ...item, quantity: Math.max(0, item.quantity + delta) }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  }
+
+  function removeFromCart(productId) {
+    setCart((previous) => previous.filter((item) => item.id !== productId));
+  }
+
+  async function handleCheckout() {
+    if (!cart.length) {
+      setNotice("سبد خرید شما خالی است.");
+      return;
+    }
+
+    setIsSubmittingOrder(true);
+    setNotice("");
+
+    try {
+      const result = await submitCartOrder({
+        customer: activeUser?.fullName || "کاربر",
+        items: cart.map(({ id, title, price, quantity }) => ({
+          id,
+          title,
+          price,
+          quantity,
+        })),
+        total: cartTotal,
+      });
+
+      setNotice(result.message || "سفارش شما با موفقیت ثبت شد.");
+      setCart([]);
+    } catch (error) {
+      const message = error?.payload?.message || error?.message || "ثبت سفارش انجام نشد.";
+      setNotice(message);
+    } finally {
+      setIsSubmittingOrder(false);
+    }
+  }
+
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const nextErrors = {};
+    const normalizedPhone = normalizeDigits(values.phone).replace(/\D/g, "");
+    const password = values.password.trim();
 
     if (isSignup && values.name.trim().length < 2) {
       nextErrors.name = "نام خودت رو با حداقل ۲ حرف وارد کن.";
     }
 
-    if (!/^09\d{9}$/.test(values.phone)) {
+    if (!/^09\d{9}$/.test(normalizedPhone)) {
       nextErrors.phone = "یک شماره موبایل معتبر مثل 09123456789 وارد کن.";
     }
-if (!isForgot && !values.password) {
-  nextErrors.password = "رمز عبورت رو وارد کن.";
-} else if (isSignup && values.password.length < 8) {
-  nextErrors.password = "رمز عبور باید حداقل ۸ کاراکتر داشته باشه.";
-}
+
+    if (!isForgot && !password) {
+      nextErrors.password = "رمز عبورت رو وارد کن.";
+    } else if (isSignup && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,72}$/.test(password)) {
+      nextErrors.password = "رمز عبور باید حداقل ۸ کاراکتر، با حرف بزرگ، کوچک و عدد باشد.";
+    } else if (!isSignup && password.length < 8) {
+      nextErrors.password = "رمز عبور باید حداقل ۸ کاراکتر داشته باشد.";
+    }
 
     if (isSignup && !values.acceptTerms) {
       nextErrors.acceptTerms = "برای ادامه، شرایط استفاده رو تأیید کن.";
@@ -127,15 +421,54 @@ if (!isForgot && !values.password) {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 
-    // اتصال به API ورود، ثبت‌نام یا درخواست بازیابی در این قسمت انجام می‌شود.
-    // رمز عبور و کد بازیابی را در localStorage ذخیره نکنید.
-    setNotice(
-      isForgot
-        ? "شماره معتبره. این نسخه نمایشی است و هنوز پیامکی ارسال نمی‌شه."
-        : isSignup
-          ? "اطلاعات معتبره. ساخت حساب بعد از اتصال به سرور فعال می‌شه."
-          : "اطلاعات فرم معتبره. بررسی حساب و ورود به اتصال سرور نیاز داره."
-    );
+    setIsSubmitting(true);
+    setNotice("");
+
+    try {
+      if (isForgot) {
+        const result = await requestPasswordReset({ phone: normalizedPhone });
+        setNotice(result.message || "درخواست بازیابی ثبت شد.");
+        setMode("login");
+        setValues((previous) => ({ ...previous, phone: normalizedPhone, password: "" }));
+        return;
+      }
+
+      if (isSignup) {
+        const result = await registerUser({
+          fullName: values.name.trim(),
+          phone: normalizedPhone,
+          password,
+        });
+
+        setNotice(result.message || "ثبت‌نام انجام شد.");
+        setMode("login");
+        setValues({ ...initialValues, phone: normalizedPhone });
+        return;
+      }
+
+      const result = await loginUser({
+        phone: normalizedPhone,
+        password,
+      });
+
+      setNotice(result.message || "ورود با موفقیت انجام شد.");
+      setActiveUser(result.user || null);
+      setValues(initialValues);
+    } catch (error) {
+      const message = error?.payload?.message || error?.message || "عملیات انجام نشد.";
+      setErrors((previous) => ({ ...previous, form: message }));
+      setNotice(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function handleLogout() {
+    clearAuthSession();
+    setActiveUser(null);
+    setNotice("شما از حساب خود خارج شدید.");
+    setMode("login");
+    setValues(initialValues);
   }
 
   const title = isForgot
@@ -149,6 +482,320 @@ if (!isForgot && !values.password) {
     : isSignup
       ? "چند قدم ساده تا شروع یک تجربه تازه."
       : "برای ادامه مسیر، وارد حسابت شو.";
+
+  if (activeUser) {
+    return (
+      <main className="page dashboard-page" dir="rtl">
+        <header className="dashboard-header">
+          <div className="brand">
+            <span className="brand-icon">
+              <SunMark />
+            </span>
+            <span className="brand-copy">
+              <strong>مهر</strong>
+              <span>داشبورد شما</span>
+            </span>
+          </div>
+
+          <div className="header-actions">
+            <button
+              type="button"
+              className="theme-toggle"
+              onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
+            >
+              {theme === "dark" ? "☀️ روشن" : "🌙 تاریک"}
+            </button>
+
+            <button type="button" className="logout-button" onClick={handleLogout}>
+              خروج
+            </button>
+          </div>
+        </header>
+
+        <section className="dashboard-shell">
+          <aside className="dashboard-sidebar">
+            <div className="dashboard-brand-mini">
+              <span className="brand-icon small-brand">
+                <SunMark />
+              </span>
+              <div>
+                <strong>مهر</strong>
+                <span>فروشگاه هوشمند</span>
+              </div>
+            </div>
+
+            <nav className="nav-list" aria-label="منوی داشبورد">
+              {sidebarNav.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={activeNav === item.id ? "nav-item active" : "nav-item"}
+                  onClick={() => setActiveNav(item.id)}
+                >
+                  <SidebarIcon name={item.icon} />
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </nav>
+
+            <div className="sidebar-card">
+              <span>درآمد ماهانه</span>
+              <strong>۲۸,۴۰۰,۰۰۰</strong>
+              <small>+۲۶٪ نسبت به ماه گذشته</small>
+            </div>
+          </aside>
+
+          <div className="dashboard-main">
+            <div className="welcome-banner">
+              <div>
+                <span className="section-label">حساب فعال</span>
+                <h1>سلام، {activeUser.fullName || "کاربر"}</h1>
+              </div>
+              <div className="welcome-actions">
+                <button type="button" className="ghost-action-button">
+                  سفارش‌های من
+                </button>
+                <button type="button" className="primary-action-button">
+                  + اضافه کردن محصول
+                </button>
+              </div>
+            </div>
+
+            <div className="featured-strip">
+              {featuredOffers.map((offer) => (
+                <div key={offer.title} className={`offer-card ${offer.accent}`}>
+                  <span>{offer.title}</span>
+                  <p>{offer.text}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="detail-panel">
+              <div className="detail-image-wrap">
+                <img src={selectedProduct.image} alt={selectedProduct.title} />
+              </div>
+
+              <div className="detail-copy">
+                <div className="detail-header">
+                  <span className="detail-badge">{selectedProduct.badge}</span>
+                  <span className="rating-pill">★ {selectedProduct.rating}</span>
+                </div>
+
+                <div className="detail-description-block">
+                  <span className="section-label">محصول منتخب</span>
+                  <h3>{selectedProduct.title}</h3>
+                </div>
+
+                <p>{selectedProduct.description}</p>
+
+                <div className="detail-meta">
+                  <span>{selectedProduct.category}</span>
+                  <span>ارسال ۲۴ ساعته</span>
+                  <span>تضمین کیفیت</span>
+                </div>
+
+                <div className="detail-price-row">
+                  <strong>{formatPrice(selectedProduct.price)}</strong>
+                  <small>تخفیف ویژه برای اعضای مهر</small>
+                </div>
+
+                <ul className="detail-features">
+                  <li>کیفیت چاپ بالا و جلد مقاوم</li>
+                  <li>مطالب کاربردی با تمرین‌های روزانه</li>
+                  <li>ارسال سریع و پشتیبانی ۷ روز هفته</li>
+                </ul>
+
+                <div className="detail-actions">
+                  <button type="button" className="primary-action-button" onClick={() => addToCart(selectedProduct)}>
+                    افزودن به سبد
+                  </button>
+                  <button type="button" className="ghost-action-button" onClick={() => setSelectedProduct(dashboardProducts[0])}>
+                    انتخاب اولیه
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="stats-grid">
+              {quickStats.map((stat) => (
+                <div key={stat.label} className="stat-box">
+                  <span>{stat.label}</span>
+                  <strong>{stat.value}</strong>
+                  <small>{stat.trend}</small>
+                </div>
+              ))}
+            </div>
+
+            <div className="products-panel">
+              <div className="panel-head">
+                <div>
+                  <span className="section-label">پیشنهاد مهر</span>
+                  <h2>محصولات منتخب</h2>
+                </div>
+                <button type="button" className="view-all-button">
+                  مشاهده همه
+                </button>
+              </div>
+
+              <div className="dashboard-toolbar">
+                <label className="search-box" aria-label="جست‌وجو در محصولات">
+                  <span>⌕</span>
+                  <input
+                    type="search"
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    placeholder="جست‌وجو در محصولات..."
+                  />
+                </label>
+
+                <div className="toolbar-pills" aria-label="دسته‌بندی محصولات">
+                  {productCategories.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      className={selectedCategory === category ? "category-pill active" : "category-pill"}
+                      onClick={() => setSelectedCategory(category)}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="product-grid">
+                {filteredProducts.length > 0 ? (
+                  filteredProducts.map((product) => (
+                    <article key={product.id} className="product-card">
+                      <div className="product-image-wrap">
+                        <span className="product-badge">{product.badge}</span>
+                        <img src={product.image} alt={product.title} className="product-image" />
+                      </div>
+                      <div className="product-info">
+                        <div className="product-meta">
+                          <span>{product.category}</span>
+                          <span className="rating-pill">★ {product.rating}</span>
+                        </div>
+                        <h3>{product.title}</h3>
+                        <p>{product.description}</p>
+                        <div className="product-footer">
+                          <strong>{formatPrice(product.price)}</strong>
+                          <div className="product-cta">
+                            <button
+                              type="button"
+                              className="secondary-button"
+                              onClick={() => setSelectedProduct(product)}
+                            >
+                              جزئیات
+                            </button>
+                            <button
+                              type="button"
+                              className="buy-button"
+                              onClick={() => addToCart(product)}
+                            >
+                              افزودن به سبد
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  ))
+                ) : (
+                  <div className="empty-results">
+                    <p>هیچ محصولی با این جست‌وجو پیدا نشد.</p>
+                    <button type="button" onClick={() => { setSearchTerm(""); setSelectedCategory("همه"); }}>
+                      نمایش همه محصولات
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <aside className="cart-panel">
+            <div className="cart-header">
+              <div>
+                <span className="section-label">سبد خرید</span>
+                <h3>محصولات انتخابی</h3>
+              </div>
+              <span className="cart-badge">{cartCount}</span>
+            </div>
+
+            <div className="mini-summary">
+              <span>جمع فعلی</span>
+              <strong>{formatPrice(cartTotal)}</strong>
+            </div>
+
+            {cart.length === 0 ? (
+              <div className="empty-cart">
+                <div className="empty-cart-icon">🛒</div>
+                <p>سبد خرید شما خالی است.</p>
+                <span>محصولات مورد علاقه‌ات را انتخاب کن.</span>
+              </div>
+            ) : (
+              <div className="cart-items">
+                {cart.map((item) => (
+                  <div key={item.id} className="cart-item">
+                    <div className="cart-item-copy">
+                      <strong>{item.title}</strong>
+                      <span>{formatPrice(item.price)}</span>
+                    </div>
+
+                    <div className="cart-actions">
+                      <div className="quantity-box">
+                        <button type="button" onClick={() => updateCartQuantity(item.id, -1)}>
+                          −
+                        </button>
+                        <span>{item.quantity}</span>
+                        <button type="button" onClick={() => updateCartQuantity(item.id, 1)}>
+                          +
+                        </button>
+                      </div>
+
+                      <button type="button" className="remove-item" onClick={() => removeFromCart(item.id)}>
+                        حذف
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="recent-orders">
+              <h4>آخرین سفارش‌ها</h4>
+              <ul>
+                {recentOrders.map((order) => (
+                  <li key={order.name}>
+                    <span>{order.name}</span>
+                    <small>{order.status}</small>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="cart-summary">
+              <div className="summary-row">
+                <span>جمع سبد</span>
+                <strong>{formatPrice(cartTotal)}</strong>
+              </div>
+              <div className="summary-row total-row">
+                <span>جمع نهایی</span>
+                <strong>{formatPrice(cartTotal)}</strong>
+              </div>
+
+              <button
+                type="button"
+                className="checkout-button"
+                onClick={handleCheckout}
+                disabled={isSubmittingOrder || cart.length === 0}
+              >
+                {isSubmittingOrder ? "در حال ثبت سفارش..." : "تأیید و پرداخت"}
+              </button>
+            </div>
+          </aside>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="page" dir="rtl">
@@ -172,7 +819,17 @@ if (!isForgot && !values.password) {
           </span>
         </a>
 
-        <span className="header-caption">اینجا، آغاز یک همراهی‌ست.</span>
+        <div className="header-actions">
+          <button
+            type="button"
+            className="theme-toggle"
+            aria-label={theme === "dark" ? "تغییر به حالت روشن" : "تغییر به حالت تاریک"}
+            onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
+          >
+            {theme === "dark" ? "☀️ روشن" : "🌙 تاریک"}
+          </button>
+          <span className="header-caption">اینجا، آغاز یک همراهی‌ست.</span>
+        </div>
       </header>
 
       <section
@@ -382,13 +1039,21 @@ if (!isForgot && !values.password) {
                   </div>
                 ) : null}
 
-                <button type="submit" className="submit-button">
+                {errors.form && (
+                  <div className="notice error" role="alert">
+                    {errors.form}
+                  </div>
+                )}
+
+                <button type="submit" className="submit-button" disabled={isSubmitting}>
                   <span>
-                    {isForgot
-                      ? "درخواست بازیابی رمز"
-                      : isSignup
-                        ? "ساخت حساب مهر"
-                        : "ورود به مهر"}
+                    {isSubmitting
+                      ? "در حال ارسال..."
+                      : isForgot
+                        ? "درخواست بازیابی رمز"
+                        : isSignup
+                          ? "ساخت حساب مهر"
+                          : "ورود به مهر"}
                   </span>
                   <span aria-hidden="true">←</span>
                 </button>
@@ -398,10 +1063,10 @@ if (!isForgot && !values.password) {
                     {notice}
                   </div>
                 )}
-                <button type="button" onClick={handleCheckServer}>
-  تست اتصال به سرور
-</button>
 
+                <button type="button" onClick={handleCheckServer} className="text-button">
+                  تست اتصال به سرور
+                </button>
               </form>
 
               <div className="form-switch">
