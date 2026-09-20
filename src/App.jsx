@@ -1158,10 +1158,6 @@ export default function App() {
                     {notice}
                   </div>
                 )}
-
-                <button type="button" onClick={handleCheckServer} className="text-button">
-                  تست اتصال به سرور
-                </button>
               </form>
 
               <div className="form-switch">
