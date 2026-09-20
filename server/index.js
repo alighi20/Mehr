@@ -1,5 +1,8 @@
 import express from "express";
 import cors from "cors";
+import authRouter from "./auth.js";
+import "dotenv/config";
+
 
 const app = express();
 const PORT = 3001;
@@ -12,10 +15,12 @@ app.use(
 
 app.use(express.json());
 
+app.use("/api/auth", authRouter);
+
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
-    message: "ارتباط با سرور مهر برقرار شد",
+    message: "ارتباط با سرور مهر برقرار شد.",
   });
 });
 

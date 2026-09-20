@@ -63,15 +63,16 @@ export default function App() {
     const isSignup = mode === "signup";
   const isForgot = mode === "forgot";
 
-  async function handleCheckServer() {
-    try {
-      const data = await checkServer();
-      window.alert(data.message);
-    } catch (error) {
-      console.error("API connection failed:", error);
-      window.alert("اتصال به سرور برقرار نشد.");
-    }
+ async function handleCheckServer() {
+  try {
+    const data = await checkServer();
+    window.alert(data.message || "اتصال به سرور برقرار است.");
+  } catch (error) {
+    console.error("API connection failed:", error);
+    window.alert("اتصال به سرور برقرار نشد.");
   }
+}
+
 
   function changeMode(nextMode) {
 
@@ -113,12 +114,11 @@ export default function App() {
     if (!/^09\d{9}$/.test(values.phone)) {
       nextErrors.phone = "یک شماره موبایل معتبر مثل 09123456789 وارد کن.";
     }
-
-    if (!isForgot && !values.password) {
-      nextErrors.password = "رمز عبورت رو وارد کن.";
-    } else if (isSignup && values.password.length < 8) {
-      nextErrors.password = "رمز عبور باید حداقل ۸ کاراکتر باشه.";
-    }
+if (!isForgot && !values.password) {
+  nextErrors.password = "رمز عبورت رو وارد کن.";
+} else if (isSignup && values.password.length < 8) {
+  nextErrors.password = "رمز عبور باید حداقل ۸ کاراکتر داشته باشه.";
+}
 
     if (isSignup && !values.acceptTerms) {
       nextErrors.acceptTerms = "برای ادامه، شرایط استفاده رو تأیید کن.";
