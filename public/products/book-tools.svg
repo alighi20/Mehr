@@ -1,13 +1,24 @@
 <svg width="360" height="220" viewBox="0 0 360 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="360" height="220" rx="24" fill="#EEFBEF"/>
-  <rect x="35" y="36" width="126" height="148" rx="18" fill="#D9EDE4"/>
-  <circle cx="95" cy="86" r="24" fill="#9FD0B0"/>
-  <path d="M69 135H121" stroke="#3E8D6B" stroke-width="8" stroke-linecap="round"/>
-  <path d="M69 155H108" stroke="#69A982" stroke-width="8" stroke-linecap="round"/>
-  <rect x="205" y="48" width="112" height="120" rx="18" fill="#FFFFFF"/>
-  <rect x="220" y="64" width="76" height="12" rx="6" fill="#8FC3A1"/>
-  <rect x="220" y="86" width="82" height="10" rx="5" fill="#DDEFE5"/>
-  <rect x="220" y="104" width="58" height="10" rx="5" fill="#DDEFE5"/>
-  <rect x="220" y="122" width="70" height="10" rx="5" fill="#DDEFE5"/>
-  <rect x="223" y="142" width="76" height="12" rx="6" fill="#7AB496"/>
+  <defs>
+    <linearGradient id="bgTools" x1="0" y1="0" x2="360" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ECF9F4"/>
+      <stop offset="0.48" stop-color="#E6F7F0"/>
+      <stop offset="1" stop-color="#F9F4E6"/>
+    </linearGradient>
+  </defs>
+  <rect width="360" height="220" rx="24" fill="url(#bgTools)"/>
+  <circle cx="286" cy="56" r="34" fill="#D9F3E8"/>
+  <circle cx="310" cy="160" r="22" fill="#F5D493" fill-opacity="0.8"/>
+  <rect x="34" y="35" width="128" height="152" rx="18" fill="#DFF0E7"/>
+  <circle cx="96" cy="88" r="25" fill="#9ED3AE"/>
+  <circle cx="96" cy="88" r="11" fill="#FDFEFE" fill-opacity="0.85"/>
+  <path d="M67 136H125" stroke="#2F8E67" stroke-width="8" stroke-linecap="round"/>
+  <path d="M71 158H115" stroke="#5BAA84" stroke-width="8" stroke-linecap="round"/>
+  <rect x="202" y="46" width="114" height="122" rx="18" fill="#FFFFFF"/>
+  <rect x="218" y="62" width="78" height="12" rx="6" fill="#8DC4A6"/>
+  <rect x="218" y="84" width="84" height="10" rx="5" fill="#E0EFE6"/>
+  <rect x="218" y="102" width="60" height="10" rx="5" fill="#E0EFE6"/>
+  <rect x="218" y="120" width="74" height="10" rx="5" fill="#E0EFE6"/>
+  <rect x="218" y="138" width="80" height="12" rx="6" fill="#6BBBB0"/>
+  <path d="M176 58C183 73 194 85 210 92" stroke="#2F8E67" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
 </svg>

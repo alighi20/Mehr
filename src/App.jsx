@@ -196,7 +196,7 @@ export default function App() {
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("همه");
-  const [activeNav, setActiveNav] = useState("dashboard");
+  const [activePage, setActivePage] = useState("dashboard");
   const [selectedProduct, setSelectedProduct] = useState(dashboardProducts[0]);
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") {
@@ -471,6 +471,13 @@ export default function App() {
     setValues(initialValues);
   }
 
+  function goToPage(pageKey, product = null) {
+    setActivePage(pageKey);
+    if (product) {
+      setSelectedProduct(product);
+    }
+  }
+
   const title = isForgot
     ? "رمزت رو فراموش کردی؟"
     : isSignup
@@ -484,317 +491,405 @@ export default function App() {
       : "برای ادامه مسیر، وارد حسابت شو.";
 
   if (activeUser) {
-    return (
-      <main className="page dashboard-page" dir="rtl">
-        <header className="dashboard-header">
-          <div className="brand">
-            <span className="brand-icon">
-              <SunMark />
-            </span>
-            <span className="brand-copy">
-              <strong>مهر</strong>
-              <span>داشبورد شما</span>
-            </span>
-          </div>
-
-          <div className="header-actions">
-            <button
-              type="button"
-              className="theme-toggle"
-              onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
-            >
-              {theme === "dark" ? "☀️ روشن" : "🌙 تاریک"}
-            </button>
-
-            <button type="button" className="logout-button" onClick={handleLogout}>
-              خروج
-            </button>
-          </div>
-        </header>
-
-        <section className="dashboard-shell">
-          <aside className="dashboard-sidebar">
-            <div className="dashboard-brand-mini">
-              <span className="brand-icon small-brand">
-                <SunMark />
-              </span>
-              <div>
-                <strong>مهر</strong>
-                <span>فروشگاه هوشمند</span>
-              </div>
-            </div>
-
-            <nav className="nav-list" aria-label="منوی داشبورد">
-              {sidebarNav.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={activeNav === item.id ? "nav-item active" : "nav-item"}
-                  onClick={() => setActiveNav(item.id)}
-                >
-                  <SidebarIcon name={item.icon} />
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </nav>
-
-            <div className="sidebar-card">
-              <span>درآمد ماهانه</span>
-              <strong>۲۸,۴۰۰,۰۰۰</strong>
-              <small>+۲۶٪ نسبت به ماه گذشته</small>
-            </div>
-          </aside>
-
-          <div className="dashboard-main">
-            <div className="welcome-banner">
-              <div>
-                <span className="section-label">حساب فعال</span>
-                <h1>سلام، {activeUser.fullName || "کاربر"}</h1>
-              </div>
-              <div className="welcome-actions">
-                <button type="button" className="ghost-action-button">
-                  سفارش‌های من
-                </button>
-                <button type="button" className="primary-action-button">
-                  + اضافه کردن محصول
-                </button>
-              </div>
-            </div>
-
-            <div className="featured-strip">
-              {featuredOffers.map((offer) => (
-                <div key={offer.title} className={`offer-card ${offer.accent}`}>
-                  <span>{offer.title}</span>
-                  <p>{offer.text}</p>
+    const renderUserPage = () => {
+      switch (activePage) {
+        case "books":
+          return (
+            <main className="page dashboard-page" dir="rtl">
+              <header className="dashboard-header">
+                <div className="brand">
+                  <span className="brand-icon"><SunMark /></span>
+                  <span className="brand-copy"><strong>مهر</strong><span>کتاب‌ها</span></span>
                 </div>
-              ))}
-            </div>
-
-            <div className="detail-panel">
-              <div className="detail-image-wrap">
-                <img src={selectedProduct.image} alt={selectedProduct.title} />
-              </div>
-
-              <div className="detail-copy">
-                <div className="detail-header">
-                  <span className="detail-badge">{selectedProduct.badge}</span>
-                  <span className="rating-pill">★ {selectedProduct.rating}</span>
+                <div className="header-actions">
+                  <button type="button" className="theme-toggle" onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}>{theme === "dark" ? "☀️ روشن" : "🌙 تاریک"}</button>
+                  <button type="button" className="logout-button" onClick={handleLogout}>خروج</button>
                 </div>
+              </header>
 
-                <div className="detail-description-block">
-                  <span className="section-label">محصول منتخب</span>
-                  <h3>{selectedProduct.title}</h3>
-                </div>
+              <section className="dashboard-shell">
+                <aside className="dashboard-sidebar">
+                  <div className="dashboard-brand-mini">
+                    <span className="brand-icon small-brand"><SunMark /></span>
+                    <div><strong>مهر</strong><span>فروشگاه هوشمند</span></div>
+                  </div>
+                  <nav className="nav-list" aria-label="منوی داشبورد">
+                    {sidebarNav.map((item) => (
+                      <button key={item.id} type="button" className={activePage === item.id ? "nav-item active" : "nav-item"} onClick={() => setActivePage(item.id)}>
+                        <SidebarIcon name={item.icon} />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+                  <div className="sidebar-card"><span>درآمد ماهانه</span><strong>۲۸,۴۰۰,۰۰۰</strong><small>+۲۶٪ نسبت به ماه گذشته</small></div>
+                </aside>
 
-                <p>{selectedProduct.description}</p>
+                <div className="dashboard-main">
+                  <div className="page-hero">
+                    <div>
+                      <span className="section-label">کتاب‌ها</span>
+                      <h2>پیشنهادهای منتخب مهر</h2>
+                    </div>
+                    <button type="button" className="primary-action-button" onClick={() => goToPage("add-product")}>+ افزودن محصول</button>
+                  </div>
 
-                <div className="detail-meta">
-                  <span>{selectedProduct.category}</span>
-                  <span>ارسال ۲۴ ساعته</span>
-                  <span>تضمین کیفیت</span>
-                </div>
+                  <div className="dashboard-toolbar">
+                    <label className="search-box" aria-label="جست‌وجو در محصولات">
+                      <span>⌕</span>
+                      <input type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="جست‌وجو در محصولات..." />
+                    </label>
+                    <div className="toolbar-pills" aria-label="دسته‌بندی محصولات">
+                      {productCategories.map((category) => (
+                        <button key={category} type="button" className={selectedCategory === category ? "category-pill active" : "category-pill"} onClick={() => setSelectedCategory(category)}>{category}</button>
+                      ))}
+                    </div>
+                  </div>
 
-                <div className="detail-price-row">
-                  <strong>{formatPrice(selectedProduct.price)}</strong>
-                  <small>تخفیف ویژه برای اعضای مهر</small>
-                </div>
-
-                <ul className="detail-features">
-                  <li>کیفیت چاپ بالا و جلد مقاوم</li>
-                  <li>مطالب کاربردی با تمرین‌های روزانه</li>
-                  <li>ارسال سریع و پشتیبانی ۷ روز هفته</li>
-                </ul>
-
-                <div className="detail-actions">
-                  <button type="button" className="primary-action-button" onClick={() => addToCart(selectedProduct)}>
-                    افزودن به سبد
-                  </button>
-                  <button type="button" className="ghost-action-button" onClick={() => setSelectedProduct(dashboardProducts[0])}>
-                    انتخاب اولیه
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="stats-grid">
-              {quickStats.map((stat) => (
-                <div key={stat.label} className="stat-box">
-                  <span>{stat.label}</span>
-                  <strong>{stat.value}</strong>
-                  <small>{stat.trend}</small>
-                </div>
-              ))}
-            </div>
-
-            <div className="products-panel">
-              <div className="panel-head">
-                <div>
-                  <span className="section-label">پیشنهاد مهر</span>
-                  <h2>محصولات منتخب</h2>
-                </div>
-                <button type="button" className="view-all-button">
-                  مشاهده همه
-                </button>
-              </div>
-
-              <div className="dashboard-toolbar">
-                <label className="search-box" aria-label="جست‌وجو در محصولات">
-                  <span>⌕</span>
-                  <input
-                    type="search"
-                    value={searchTerm}
-                    onChange={(event) => setSearchTerm(event.target.value)}
-                    placeholder="جست‌وجو در محصولات..."
-                  />
-                </label>
-
-                <div className="toolbar-pills" aria-label="دسته‌بندی محصولات">
-                  {productCategories.map((category) => (
-                    <button
-                      key={category}
-                      type="button"
-                      className={selectedCategory === category ? "category-pill active" : "category-pill"}
-                      onClick={() => setSelectedCategory(category)}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="product-grid">
-                {filteredProducts.length > 0 ? (
-                  filteredProducts.map((product) => (
-                    <article key={product.id} className="product-card">
-                      <div className="product-image-wrap">
-                        <span className="product-badge">{product.badge}</span>
-                        <img src={product.image} alt={product.title} className="product-image" />
+                  <div className="product-grid">
+                    {filteredProducts.length > 0 ? (
+                      filteredProducts.map((product) => (
+                        <article key={product.id} className="product-card">
+                          <div className="product-image-wrap"><span className="product-badge">{product.badge}</span><img src={product.image} alt={product.title} className="product-image" /></div>
+                          <div className="product-info">
+                            <div className="product-meta"><span>{product.category}</span><span className="rating-pill">★ {product.rating}</span></div>
+                            <h3>{product.title}</h3>
+                            <p>{product.description}</p>
+                            <div className="product-footer">
+                              <strong>{formatPrice(product.price)}</strong>
+                              <div className="product-cta">
+                                <button type="button" className="secondary-button" onClick={() => goToPage("product-detail", product)}>جزئیات</button>
+                                <button type="button" className="buy-button" onClick={() => {
+                                  addToCart(product);
+                                  goToPage("cart");
+                                }}>افزودن به سبد</button>
+                              </div>
+                            </div>
+                          </div>
+                        </article>
+                      ))
+                    ) : (
+                      <div className="empty-results">
+                        <p>هیچ محصولی با این جست‌وجو پیدا نشد.</p>
+                        <button type="button" onClick={() => { setSearchTerm(""); setSelectedCategory("همه"); }}>نمایش همه محصولات</button>
                       </div>
-                      <div className="product-info">
-                        <div className="product-meta">
-                          <span>{product.category}</span>
-                          <span className="rating-pill">★ {product.rating}</span>
-                        </div>
-                        <h3>{product.title}</h3>
-                        <p>{product.description}</p>
-                        <div className="product-footer">
-                          <strong>{formatPrice(product.price)}</strong>
-                          <div className="product-cta">
-                            <button
-                              type="button"
-                              className="secondary-button"
-                              onClick={() => setSelectedProduct(product)}
-                            >
-                              جزئیات
-                            </button>
-                            <button
-                              type="button"
-                              className="buy-button"
-                              onClick={() => addToCart(product)}
-                            >
-                              افزودن به سبد
-                            </button>
+                    )}
+                  </div>
+                </div>
+
+                <aside className="cart-panel">
+                  <div className="cart-header">
+                    <div><span className="section-label">سبد خرید</span><h3>محصولات انتخابی</h3></div>
+                    <span className="cart-badge">{cartCount}</span>
+                  </div>
+                  <div className="mini-summary"><span>جمع فعلی</span><strong>{formatPrice(cartTotal)}</strong></div>
+                  {cart.length === 0 ? (
+                    <div className="empty-cart"><div className="empty-cart-icon">🛒</div><p>سبد خرید شما خالی است.</p><span>محصولات مورد علاقه‌ات را انتخاب کن.</span></div>
+                  ) : (
+                    <div className="cart-items">
+                      {cart.map((item) => (
+                        <div key={item.id} className="cart-item">
+                          <div className="cart-item-copy"><strong>{item.title}</strong><span>{formatPrice(item.price)}</span></div>
+                          <div className="cart-actions">
+                            <div className="quantity-box"><button type="button" onClick={() => updateCartQuantity(item.id, -1)}>−</button><span>{item.quantity}</span><button type="button" onClick={() => updateCartQuantity(item.id, 1)}>+</button></div>
+                            <button type="button" className="remove-item" onClick={() => removeFromCart(item.id)}>حذف</button>
                           </div>
                         </div>
-                      </div>
-                    </article>
-                  ))
-                ) : (
-                  <div className="empty-results">
-                    <p>هیچ محصولی با این جست‌وجو پیدا نشد.</p>
-                    <button type="button" onClick={() => { setSearchTerm(""); setSelectedCategory("همه"); }}>
-                      نمایش همه محصولات
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <aside className="cart-panel">
-            <div className="cart-header">
-              <div>
-                <span className="section-label">سبد خرید</span>
-                <h3>محصولات انتخابی</h3>
-              </div>
-              <span className="cart-badge">{cartCount}</span>
-            </div>
-
-            <div className="mini-summary">
-              <span>جمع فعلی</span>
-              <strong>{formatPrice(cartTotal)}</strong>
-            </div>
-
-            {cart.length === 0 ? (
-              <div className="empty-cart">
-                <div className="empty-cart-icon">🛒</div>
-                <p>سبد خرید شما خالی است.</p>
-                <span>محصولات مورد علاقه‌ات را انتخاب کن.</span>
-              </div>
-            ) : (
-              <div className="cart-items">
-                {cart.map((item) => (
-                  <div key={item.id} className="cart-item">
-                    <div className="cart-item-copy">
-                      <strong>{item.title}</strong>
-                      <span>{formatPrice(item.price)}</span>
+                      ))}
                     </div>
+                  )}
+                  <div className="cart-summary">
+                    <div className="summary-row"><span>جمع سبد</span><strong>{formatPrice(cartTotal)}</strong></div>
+                    <div className="summary-row total-row"><span>جمع نهایی</span><strong>{formatPrice(cartTotal)}</strong></div>
+                    <button type="button" className="checkout-button" onClick={() => goToPage("cart")}>مشاهده سبد خرید</button>
+                  </div>
+                </aside>
+              </section>
+            </main>
+          );
 
-                    <div className="cart-actions">
-                      <div className="quantity-box">
-                        <button type="button" onClick={() => updateCartQuantity(item.id, -1)}>
-                          −
-                        </button>
-                        <span>{item.quantity}</span>
-                        <button type="button" onClick={() => updateCartQuantity(item.id, 1)}>
-                          +
-                        </button>
+        case "cart":
+          return (
+            <main className="page dashboard-page" dir="rtl">
+              <header className="dashboard-header">
+                <div className="brand"><span className="brand-icon"><SunMark /></span><span className="brand-copy"><strong>مهر</strong><span>سبد خرید</span></span></div>
+                <div className="header-actions">
+                  <button type="button" className="theme-toggle" onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}>{theme === "dark" ? "☀️ روشن" : "🌙 تاریک"}</button>
+                  <button type="button" className="logout-button" onClick={handleLogout}>خروج</button>
+                </div>
+              </header>
+
+              <section className="screen-shell">
+                <div className="screen-panel wide-panel">
+                  <div className="page-hero">
+                    <div><span className="section-label">سبد خرید</span><h2>محصولات انتخابی شما</h2></div>
+                    <div className="welcome-actions">
+                      <button type="button" className="ghost-action-button" onClick={() => goToPage("books")}>بازگشت به کتاب‌ها</button>
+                      <button type="button" className="primary-action-button" onClick={() => goToPage("dashboard")}>داشبورد</button>
+                    </div>
+                  </div>
+
+                  {cart.length === 0 ? (
+                    <div className="empty-cart large-empty"><div className="empty-cart-icon">🛒</div><p>سبد خرید شما خالی است.</p><span>برای شروع خرید، یکی از کتاب‌ها را انتخاب کنید.</span><button type="button" className="primary-action-button" onClick={() => goToPage("books")}>مشاهده محصولات</button></div>
+                  ) : (
+                    <>
+                      <div className="cart-list-block">
+                        {cart.map((item) => (
+                          <div key={item.id} className="line-item">
+                            <div className="line-item-info">
+                              <img src={item.image} alt={item.title} className="line-item-image" />
+                              <div>
+                                <strong>{item.title}</strong>
+                                <span>{item.category}</span>
+                              </div>
+                            </div>
+                            <div className="line-item-tools">
+                              <div className="quantity-box">
+                                <button type="button" onClick={() => updateCartQuantity(item.id, -1)}>−</button>
+                                <span>{item.quantity}</span>
+                                <button type="button" onClick={() => updateCartQuantity(item.id, 1)}>+</button>
+                              </div>
+                              <strong>{formatPrice(item.price * item.quantity)}</strong>
+                              <button type="button" className="remove-item" onClick={() => removeFromCart(item.id)}>حذف</button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
 
-                      <button type="button" className="remove-item" onClick={() => removeFromCart(item.id)}>
-                        حذف
+                      <div className="checkout-box">
+                        <div className="summary-row"><span>جمع محصولات</span><strong>{formatPrice(cartTotal)}</strong></div>
+                        <div className="summary-row"><span>هزینه ارسال</span><strong>رایگان</strong></div>
+                        <div className="summary-row total-row"><span>مبلغ نهایی</span><strong>{formatPrice(cartTotal)}</strong></div>
+                        <button type="button" className="checkout-button" onClick={handleCheckout} disabled={isSubmittingOrder}>{isSubmittingOrder ? "در حال ثبت سفارش..." : "تأیید و پرداخت"}</button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </section>
+            </main>
+          );
+
+        case "orders":
+          return (
+            <main className="page dashboard-page" dir="rtl">
+              <header className="dashboard-header">
+                <div className="brand"><span className="brand-icon"><SunMark /></span><span className="brand-copy"><strong>مهر</strong><span>سفارش‌ها</span></span></div>
+                <div className="header-actions">
+                  <button type="button" className="theme-toggle" onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}>{theme === "dark" ? "☀️ روشن" : "🌙 تاریک"}</button>
+                  <button type="button" className="logout-button" onClick={handleLogout}>خروج</button>
+                </div>
+              </header>
+
+              <section className="screen-shell">
+                <div className="screen-panel wide-panel">
+                  <div className="page-hero">
+                    <div><span className="section-label">سفارش‌ها</span><h2>آخرین خریدهای شما</h2></div>
+                    <button type="button" className="primary-action-button" onClick={() => goToPage("dashboard")}>بازگشت به داشبورد</button>
+                  </div>
+
+                  <div className="order-list">
+                    {recentOrders.map((order, index) => (
+                      <div key={order.name} className="order-row">
+                        <div>
+                          <strong>#{index + 1} {order.name}</strong>
+                          <span>شماره سفارش: ۲۱۶۸۷{index + 11}</span>
+                        </div>
+                        <div className="order-meta">
+                          <small>{order.status}</small>
+                          <button type="button" className="ghost-action-button" onClick={() => goToPage("books")}>مشاهده مجدد</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            </main>
+          );
+
+        case "profile":
+          return (
+            <main className="page dashboard-page" dir="rtl">
+              <header className="dashboard-header">
+                <div className="brand"><span className="brand-icon"><SunMark /></span><span className="brand-copy"><strong>مهر</strong><span>پروفایل</span></span></div>
+                <div className="header-actions">
+                  <button type="button" className="theme-toggle" onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}>{theme === "dark" ? "☀️ روشن" : "🌙 تاریک"}</button>
+                  <button type="button" className="logout-button" onClick={handleLogout}>خروج</button>
+                </div>
+              </header>
+
+              <section className="screen-shell">
+                <div className="screen-panel wide-panel profile-card-page">
+                  <div className="page-hero">
+                    <div><span className="section-label">پروفایل</span><h2>اطلاعات حساب</h2></div>
+                    <button type="button" className="primary-action-button" onClick={() => goToPage("dashboard")}>بازگشت</button>
+                  </div>
+
+                  <div className="profile-box">
+                    <div className="profile-avatar">{(activeUser.fullName || "کاربر").slice(0, 1)}</div>
+                    <div className="profile-info">
+                      <strong>{activeUser.fullName || "کاربر"}</strong>
+                      <span>{activeUser.phone || "شماره نامشخص"}</span>
+                      <small>عضویت فعال در مهر</small>
+                    </div>
+                  </div>
+
+                  <div className="profile-actions">
+                    <button type="button" className="ghost-action-button" onClick={() => goToPage("orders")}>سفارش‌ها</button>
+                    <button type="button" className="ghost-action-button" onClick={() => goToPage("books")}>کتاب‌ها</button>
+                    <button type="button" className="logout-button" onClick={handleLogout}>خروج از حساب</button>
+                  </div>
+                </div>
+              </section>
+            </main>
+          );
+
+        case "product-detail":
+          return (
+            <main className="page dashboard-page" dir="rtl">
+              <header className="dashboard-header">
+                <div className="brand"><span className="brand-icon"><SunMark /></span><span className="brand-copy"><strong>مهر</strong><span>جزئیات محصول</span></span></div>
+                <div className="header-actions">
+                  <button type="button" className="theme-toggle" onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}>{theme === "dark" ? "☀️ روشن" : "🌙 تاریک"}</button>
+                  <button type="button" className="logout-button" onClick={handleLogout}>خروج</button>
+                </div>
+              </header>
+
+              <section className="screen-shell">
+                <div className="screen-panel wide-panel product-detail-page">
+                  <button type="button" className="ghost-action-button" onClick={() => goToPage("books")}>← بازگشت به کتاب‌ها</button>
+                  <div className="detail-panel detail-page-card">
+                    <div className="detail-image-wrap"><img src={selectedProduct.image} alt={selectedProduct.title} /></div>
+                    <div className="detail-copy">
+                      <div className="detail-header"><span className="detail-badge">{selectedProduct.badge}</span><span className="rating-pill">★ {selectedProduct.rating}</span></div>
+                      <div className="detail-description-block"><span className="section-label">محصول منتخب</span><h3>{selectedProduct.title}</h3></div>
+                      <p>{selectedProduct.description}</p>
+                      <div className="detail-meta"><span>{selectedProduct.category}</span><span>ارسال ۲۴ ساعته</span><span>تضمین کیفیت</span></div>
+                      <div className="detail-price-row"><strong>{formatPrice(selectedProduct.price)}</strong><small>تخفیف ویژه برای اعضای مهر</small></div>
+                      <ul className="detail-features"><li>کیفیت چاپ بالا و جلد مقاوم</li><li>مطالب کاربردی با تمرین‌های روزانه</li><li>ارسال سریع و پشتیبانی ۷ روز هفته</li></ul>
+                      <div className="detail-actions">
+                        <button type="button" className="primary-action-button" onClick={() => {
+                          addToCart(selectedProduct);
+                          goToPage("cart");
+                        }}>افزودن به سبد</button>
+                        <button type="button" className="ghost-action-button" onClick={() => goToPage("books")}>انصراف</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </main>
+          );
+
+        case "add-product":
+          return (
+            <main className="page dashboard-page" dir="rtl">
+              <header className="dashboard-header">
+                <div className="brand"><span className="brand-icon"><SunMark /></span><span className="brand-copy"><strong>مهر</strong><span>افزودن محصول</span></span></div>
+                <div className="header-actions">
+                  <button type="button" className="theme-toggle" onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}>{theme === "dark" ? "☀️ روشن" : "🌙 تاریک"}</button>
+                  <button type="button" className="logout-button" onClick={handleLogout}>خروج</button>
+                </div>
+              </header>
+
+              <section className="screen-shell">
+                <div className="screen-panel wide-panel">
+                  <div className="page-hero">
+                    <div><span className="section-label">محصول جدید</span><h2>ثبت کتاب در فروشگاه</h2></div>
+                    <div className="welcome-actions">
+                      <button type="button" className="ghost-action-button" onClick={() => goToPage("books")}>لغو</button>
+                      <button type="button" className="primary-action-button" onClick={() => { setNotice("محصول جدید با موفقیت ثبت شد."); goToPage("books"); }}>ذخیره محصول</button>
+                    </div>
+                  </div>
+
+                  <div className="add-product-form">
+                    <div className="field"><label>عنوان کتاب</label><input type="text" defaultValue="کتاب جدید مهر" /></div>
+                    <div className="field"><label>دسته‌بندی</label><input type="text" defaultValue="آموزشی" /></div>
+                    <div className="field"><label>قیمت</label><input type="text" defaultValue="۲۹۹۰۰۰" /></div>
+                    <div className="field"><label>توضیحات</label><textarea rows="4" defaultValue="این کتاب به‌روز و با طراحی مدرن برای کمک به رشد و تمرکز کاربران منتشر شده است." /></div>
+                  </div>
+                </div>
+              </section>
+            </main>
+          );
+
+        default:
+          return (
+            <main className="page dashboard-page" dir="rtl">
+              <header className="dashboard-header">
+                <div className="brand"><span className="brand-icon"><SunMark /></span><span className="brand-copy"><strong>مهر</strong><span>داشبورد شما</span></span></div>
+                <div className="header-actions">
+                  <button type="button" className="theme-toggle" onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}>{theme === "dark" ? "☀️ روشن" : "🌙 تاریک"}</button>
+                  <button type="button" className="logout-button" onClick={handleLogout}>خروج</button>
+                </div>
+              </header>
+
+              <section className="dashboard-shell">
+                <aside className="dashboard-sidebar">
+                  <div className="dashboard-brand-mini"><span className="brand-icon small-brand"><SunMark /></span><div><strong>مهر</strong><span>فروشگاه هوشمند</span></div></div>
+                  <nav className="nav-list" aria-label="منوی داشبورد">
+                    {sidebarNav.map((item) => (
+                      <button key={item.id} type="button" className={activePage === item.id ? "nav-item active" : "nav-item"} onClick={() => setActivePage(item.id)}>
+                        <SidebarIcon name={item.icon} />
+                        <span>{item.label}</span>
                       </button>
+                    ))}
+                  </nav>
+                  <div className="sidebar-card"><span>درآمد ماهانه</span><strong>۲۸,۴۰۰,۰۰۰</strong><small>+۲۶٪ نسبت به ماه گذشته</small></div>
+                </aside>
+
+                <div className="dashboard-main">
+                  <div className="welcome-banner">
+                    <div><span className="section-label">حساب فعال</span><h1>سلام، {activeUser.fullName || "کاربر"}</h1></div>
+                    <div className="welcome-actions">
+                      <button type="button" className="ghost-action-button" onClick={() => goToPage("orders")}>سفارش‌های من</button>
+                      <button type="button" className="primary-action-button" onClick={() => goToPage("add-product")}>+ اضافه کردن محصول</button>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
 
-            <div className="recent-orders">
-              <h4>آخرین سفارش‌ها</h4>
-              <ul>
-                {recentOrders.map((order) => (
-                  <li key={order.name}>
-                    <span>{order.name}</span>
-                    <small>{order.status}</small>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                  <div className="featured-strip">{featuredOffers.map((offer) => (<div key={offer.title} className={`offer-card ${offer.accent}`}><span>{offer.title}</span><p>{offer.text}</p></div>))}</div>
 
-            <div className="cart-summary">
-              <div className="summary-row">
-                <span>جمع سبد</span>
-                <strong>{formatPrice(cartTotal)}</strong>
-              </div>
-              <div className="summary-row total-row">
-                <span>جمع نهایی</span>
-                <strong>{formatPrice(cartTotal)}</strong>
-              </div>
+                  <div className="detail-panel">
+                    <div className="detail-image-wrap"><img src={selectedProduct.image} alt={selectedProduct.title} /></div>
+                    <div className="detail-copy">
+                      <div className="detail-header"><span className="detail-badge">{selectedProduct.badge}</span><span className="rating-pill">★ {selectedProduct.rating}</span></div>
+                      <div className="detail-description-block"><span className="section-label">محصول منتخب</span><h3>{selectedProduct.title}</h3></div>
+                      <p>{selectedProduct.description}</p>
+                      <div className="detail-meta"><span>{selectedProduct.category}</span><span>ارسال ۲۴ ساعته</span><span>تضمین کیفیت</span></div>
+                      <div className="detail-price-row"><strong>{formatPrice(selectedProduct.price)}</strong><small>تخفیف ویژه برای اعضای مهر</small></div>
+                      <ul className="detail-features"><li>کیفیت چاپ بالا و جلد مقاوم</li><li>مطالب کاربردی با تمرین‌های روزانه</li><li>ارسال سریع و پشتیبانی ۷ روز هفته</li></ul>
+                      <div className="detail-actions">
+                        <button type="button" className="primary-action-button" onClick={() => {
+                          addToCart(selectedProduct);
+                          goToPage("cart");
+                        }}>افزودن به سبد</button>
+                        <button type="button" className="ghost-action-button" onClick={() => setSelectedProduct(dashboardProducts[0])}>انتخاب اولیه</button>
+                      </div>
+                    </div>
+                  </div>
 
-              <button
-                type="button"
-                className="checkout-button"
-                onClick={handleCheckout}
-                disabled={isSubmittingOrder || cart.length === 0}
-              >
-                {isSubmittingOrder ? "در حال ثبت سفارش..." : "تأیید و پرداخت"}
-              </button>
-            </div>
-          </aside>
-        </section>
-      </main>
-    );
+                  <div className="stats-grid">{quickStats.map((stat) => (<div key={stat.label} className="stat-box"><span>{stat.label}</span><strong>{stat.value}</strong><small>{stat.trend}</small></div>))}</div>
+
+                  <div className="products-panel">
+                    <div className="panel-head"><div><span className="section-label">پیشنهاد مهر</span><h2>محصولات منتخب</h2></div><button type="button" className="view-all-button" onClick={() => goToPage("books")}>مشاهده همه</button></div>
+                    <div className="dashboard-toolbar"><label className="search-box" aria-label="جست‌وجو در محصولات"><span>⌕</span><input type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="جست‌وجو در محصولات..." /></label><div className="toolbar-pills" aria-label="دسته‌بندی محصولات">{productCategories.map((category) => (<button key={category} type="button" className={selectedCategory === category ? "category-pill active" : "category-pill"} onClick={() => setSelectedCategory(category)}>{category}</button>))}</div></div>
+                    <div className="product-grid">{filteredProducts.length > 0 ? filteredProducts.map((product) => (<article key={product.id} className="product-card"><div className="product-image-wrap"><span className="product-badge">{product.badge}</span><img src={product.image} alt={product.title} className="product-image" /></div><div className="product-info"><div className="product-meta"><span>{product.category}</span><span className="rating-pill">★ {product.rating}</span></div><h3>{product.title}</h3><p>{product.description}</p><div className="product-footer"><strong>{formatPrice(product.price)}</strong><div className="product-cta"><button type="button" className="secondary-button" onClick={() => goToPage("product-detail", product)}>جزئیات</button><button type="button" className="buy-button" onClick={() => { addToCart(product); goToPage("cart"); }}>افزودن به سبد</button></div></div></div></article>)) : <div className="empty-results"><p>هیچ محصولی با این جست‌وجو پیدا نشد.</p><button type="button" onClick={() => { setSearchTerm(""); setSelectedCategory("همه"); }}>نمایش همه محصولات</button></div>}</div>
+                  </div>
+                </div>
+
+                <aside className="cart-panel">
+                  <div className="cart-header"><div><span className="section-label">سبد خرید</span><h3>محصولات انتخابی</h3></div><span className="cart-badge">{cartCount}</span></div>
+                  <div className="mini-summary"><span>جمع فعلی</span><strong>{formatPrice(cartTotal)}</strong></div>
+                  {cart.length === 0 ? (<div className="empty-cart"><div className="empty-cart-icon">🛒</div><p>سبد خرید شما خالی است.</p><span>محصولات مورد علاقه‌ات را انتخاب کن.</span></div>) : (
+                    <div className="cart-items">{cart.map((item) => (<div key={item.id} className="cart-item"><div className="cart-item-copy"><strong>{item.title}</strong><span>{formatPrice(item.price)}</span></div><div className="cart-actions"><div className="quantity-box"><button type="button" onClick={() => updateCartQuantity(item.id, -1)}>−</button><span>{item.quantity}</span><button type="button" onClick={() => updateCartQuantity(item.id, 1)}>+</button></div><button type="button" className="remove-item" onClick={() => removeFromCart(item.id)}>حذف</button></div></div>))}</div>
+                  )}
+                  <div className="cart-summary"><div className="summary-row"><span>جمع سبد</span><strong>{formatPrice(cartTotal)}</strong></div><div className="summary-row total-row"><span>جمع نهایی</span><strong>{formatPrice(cartTotal)}</strong></div><button type="button" className="checkout-button" onClick={() => goToPage("cart")}>مشاهده سبد خرید</button></div>
+                </aside>
+              </section>
+            </main>
+          );
+      }
+    };
+
+    return renderUserPage();
   }
 
   return (
