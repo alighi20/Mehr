@@ -1,0 +1,127 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="900"
+  height="1400"
+  viewBox="0 0 900 1400"
+  fill="none"
+>
+  <defs>
+    <linearGradient id="sky" x1="450" y1="0" x2="450" y2="1400"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="#79949A"/>
+      <stop offset=".4" stop-color="#A4B4B1"/>
+      <stop offset="1" stop-color="#203B3B"/>
+    </linearGradient>
+
+    <linearGradient id="back" x1="450" y1="240" x2="450" y2="980"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="#889A9A"/>
+      <stop offset="1" stop-color="#4B676C"/>
+    </linearGradient>
+
+    <linearGradient id="main" x1="430" y1="330" x2="550" y2="1100"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="#667F84"/>
+      <stop offset=".55" stop-color="#3B5C64"/>
+      <stop offset="1" stop-color="#233F49"/>
+    </linearGradient>
+
+    <linearGradient id="front" x1="450" y1="780" x2="450" y2="1400"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2A4B4E"/>
+      <stop offset="1" stop-color="#102A30"/>
+    </linearGradient>
+
+    <linearGradient id="snow" x1="480" y1="300" x2="410" y2="640"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E0E6DF"/>
+      <stop offset="1" stop-color="#8DA6A8"/>
+    </linearGradient>
+
+    <radialGradient id="light" cx="0" cy="0" r="1"
+      gradientTransform="translate(650 200) rotate(90) scale(510 540)"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EEF0DA" stop-opacity=".38"/>
+      <stop offset="1" stop-color="#EEF0DA" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="mist" x="-30%" y="-100%" width="160%" height="300%">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+  </defs>
+
+  <path fill="url(#sky)" d="M0 0h900v1400H0z"/>
+  <path fill="url(#light)" d="M0 0h900v1400H0z"/>
+
+  <path
+    d="M-80 760 85 475 172 575 305 360 430 545 566 310
+       690 485 790 350 980 720V1400H-80Z"
+    fill="url(#back)"
+  />
+
+  <path
+    d="m305 360-69 111 62-33 30 27 28-32-51-73Z
+       m261-50-67 116 53-28 24 40 44-39-54-89Z
+       m224 40-51 76 49-18 39 23-37-81Z"
+    fill="#CCD5D0"
+    opacity=".65"
+  />
+
+  <path
+    d="M-100 1030 105 720 217 765 477 315 618 558
+       698 513 998 1025V1400H-100Z"
+    fill="url(#main)"
+  />
+
+  <path
+    d="m477 315-260 450 140-102 52-121 42 20 46-119
+       54 103 67 12-141-243Z"
+    fill="url(#snow)"
+  />
+
+  <path
+    d="m477 315 20 128 54 103 67 12 80-45-73 104
+       72 139-128-118-49-124-46 169-54 63 20-186Z"
+    fill="#243F4B"
+    opacity=".53"
+  />
+
+  <path
+    d="m409 542-52 121-140 102 141-42 63-65 30-96-42-20Z"
+    fill="#DAE2DC"
+    opacity=".45"
+  />
+
+  <g filter="url(#mist)" opacity=".2" fill="#DFE6DC">
+    <ellipse cx="150" cy="765" rx="360" ry="32"/>
+    <ellipse cx="760" cy="885" rx="360" ry="35"/>
+  </g>
+
+  <path
+    d="M-50 1010 96 893 180 930 290 826 409 940
+       548 815 655 931 756 854 950 1054V1400H-50Z"
+    fill="url(#front)"
+  />
+
+  <path
+    d="M-60 1160 118 1010 252 1134 400 975 532 1095
+       685 1019 964 1190V1400H-60Z"
+    fill="#17353A"
+  />
+
+  <path
+    d="M0 1290  <path
+    d="M0 1290 160 1175 321 
+       820 1190 900 1260V1400H0Z"
+    fill="#102C31"
+  />
+
+  <g fill="#102C31" opacity=".95">
+    <path d="m74 1060-20 66h13v48h14v-48h13Z"/>
+    <path d="m113 1020-29 96h20v63h18v-63h20Z"/>
+    <path d="m150 1080-19 68h12v42h14v-42h13Z"/>
+    <path d="m718 1060-28 89h18v68h20v-68h18Z"/>
+    <path d="m760 1030-31 105h22v72h19v-72h22Z"/>
+    <path d="m805 1090-24 79h16v54h16v-54h16Z"/>
+  </g>
+</svg>

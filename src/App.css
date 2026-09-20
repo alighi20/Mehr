@@ -1,0 +1,357 @@
+.auth-page {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 48px 24px;
+  background: #f1f2f0;
+}
+
+.auth-card {
+  width: min(100%, 1000px);
+  min-height: 760px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 12px;
+  background: #fff;
+  border-radius: 36px;
+  box-shadow:
+    0 30px 80px rgb(24 34 40 / 10%),
+    0 8px 24px rgb(24 34 40 / 4%);
+}
+
+.welcome-panel {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 736px;
+  padding: 48px 30px;
+  color: #fff;
+  text-align: center;
+  border-radius: 27px;
+
+  background-color: #243238;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgb(20 33 39 / 22%) 0%,
+      rgb(8 18 24 / 48%) 48%,
+      rgb(0 0 0 / 94%) 100%
+    ),
+    url("/mountains.svg");
+
+  background-position: center;
+  background-size: cover;
+}
+
+.welcome-content {
+  width: 100%;
+  max-width: 370px;
+  transform: translateY(32px);
+}
+
+.welcome-content h1 {
+  margin: 0 0 24px;
+  font-size: clamp(30px, 3.2vw, 39px);
+  font-weight: 650;
+  letter-spacing: -1.2px;
+  line-height: 1.2;
+}
+
+.welcome-content p {
+  margin: 0 auto;
+  max-width: 360px;
+  color: rgb(255 255 255 / 85%);
+  font-size: 21px;
+  line-height: 1.65;
+}
+
+.switch-button {
+  width: 200px;
+  min-height: 64px;
+  margin-top: 34px;
+  border: 1px solid rgb(255 255 255 / 5%);
+  border-radius: 17px;
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
+  backdrop-filter: blur(12px);
+  font-size: 22px;
+  font-weight: 600;
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.switch-button:hover {
+  background: rgb(255 255 255 / 19%);
+  transform: translateY(-2px);
+}
+
+.panel-caption {
+  position: absolute;
+  right: 20px;
+  bottom: 25px;
+  left: 20px;
+  color: rgb(255 255 255 / 42%);
+  font-size: 11px;
+  letter-spacing: 1.4px;
+}
+
+.form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 44px 46px 24px;
+}
+
+.form-content {
+  width: 100%;
+  max-width: 390px;
+}
+
+.form-content h2 {
+  margin: 0 0 34px;
+  color: #111;
+  text-align: center;
+  font-size: 34px;
+  font-weight: 750;
+  letter-spacing: -1px;
+}
+
+.form-field {
+  margin-bottom: 19px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 12px;
+  color: #292929;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.form-field input {
+  width: 100%;
+  height: 68px;
+  padding: 0 23px;
+  border: 1px solid transparent;
+  border-radius: 17px;
+  outline: none;
+  background: #eff0f5;
+  color: #25272e;
+  font-size: 19px;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.form-field input::placeholder {
+  color: #999ba4;
+  opacity: 1;
+}
+
+.form-field input:focus {
+  border-color: #8a949c;
+  background: #f7f8fb;
+  box-shadow: 0 0 0 4px rgb(52 70 82 / 8%);
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 60px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #90939c;
+}
+
+.password-toggle:hover {
+  background: rgb(0 0 0 / 5%);
+  color: #333;
+}
+
+.submit-button {
+  width: 100%;
+  min-height: 69px;
+  margin-top: 2px;
+  border: 0;
+  border-radius: 17px;
+  background: #050505;
+  color: white;
+  font-size: 22px;
+  font-weight: 650;
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.submit-button:hover {
+  background: #252b30;
+  transform: translateY(-1px);
+}
+
+.submit-button:active,
+.switch-button:active,
+.social-button:active {
+  transform: translateY(1px);
+}
+
+.social-label {
+  margin: 24px 0 22px;
+  color: #929292;
+  text-align: center;
+  font-size: 17px;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 17px;
+}
+
+.social-button {
+  display: grid;
+  width: 80px;
+  height: 68px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  background: #eff0f5;
+  color: #000;
+  font-size: 35px;
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.social-button:hover {
+  background: #e3e6ed;
+  transform: translateY(-3px);
+}
+
+.facebook-icon {
+  color: #1877f2;
+}
+
+.form-message {
+  min-height: 34px;
+  margin: 16px 0 0;
+  color: #53616a;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+button:focus-visible {
+  outline: 3px solid #718b9d;
+  outline-offset: 4px;
+}
+
+@media (min-width: 761px) and (max-width: 1000px) {
+  .form-panel {
+    padding-right: 28px;
+    padding-left: 28px;
+  }
+
+  .welcome-content p {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 760px) {
+  .auth-page {
+    padding: 24px 16px;
+  }
+
+  .auth-card {
+    max-width: 480px;
+    min-height: auto;
+    grid-template-columns: 1fr;
+    padding: 10px;
+    border-radius: 29px;
+  }
+
+  .welcome-panel {
+    min-height: 290px;
+    padding: 32px 24px 44px;
+    border-radius: 21px;
+  }
+
+  .welcome-content {
+    transform: none;
+  }
+
+  .welcome-content h1 {
+    margin-bottom: 14px;
+    font-size: 30px;
+  }
+
+  .welcome-content p {
+    max-width: 290px;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .switch-button {
+    width: 155px;
+    min-height: 48px;
+    margin-top: 22px;
+    border-radius: 13px;
+    font-size: 18px;
+  }
+
+  .panel-caption {
+    bottom: 14px;
+    font-size: 9px;
+  }
+
+  .form-panel {
+    padding: 32px 22px 10px;
+  }
+
+  .form-content h2 {
+    margin-bottom: 27px;
+    font-size: 29px;
+  }
+
+  .form-field input {
+    height: 60px;
+    font-size: 16px;
+  }
+
+  .submit-button {
+    min-height: 60px;
+    font-size: 20px;
+  }
+
+  .social-button {
+    width: 72px;
+    height: 60px;
+    font-size: 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}
